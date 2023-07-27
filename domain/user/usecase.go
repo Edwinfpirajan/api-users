@@ -2,6 +2,7 @@ package user
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/Edwinfpirajan/curso-hex-arqu.git/model"
 	"github.com/google/uuid"
@@ -30,4 +31,37 @@ func (u User) Create(m *model.User) error {
 	}
 
 	m.Password = string(password)
+
+	if m.Details == nil {
+		m.Details = []byte("{}")
+	}
+
+	m.CreatedAt = time.Now().Unix()
+
+	err = u.storage.Create(m)
+	if err != nil {
+		return fmt.Errorf("%s %w", "u.storage.Create()", err)
+	}
+
+	m.Password = ""
+
+	return nil
+}
+
+func (u User) GetByEmail(email string) (model.User, error) {
+	user, err := u.storage.GetByEmail(email)
+	if err != nil {
+		return model.User{}, fmt.Errorf("%s %w", "u.storage.GetByEmail()", err)
+	}
+
+	return user, nil
+}
+
+func (u User) GetAll() (model.Users, error) {
+	users, err := u.storage.GetAll()
+	if err != nil {
+		return model.Users{}, fmt.Errorf("%s %w", "u.storage.GetAll()", err)
+	}
+
+	return users, nil
 }
